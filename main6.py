@@ -42,27 +42,36 @@ def extract_text(url):
     return title_text, author_name, content_text
 
 def summarize_text(content, author_type, author_name, title_text):
+    # 제목과 본문 내용을 프롬프트에 추가합니다.
     prompt = f"제목: {title_text}\n\n{content}"
+
+    # 저자 정보가 "다른 사람"일 경우, 저자의 이름을 프롬프트에 추가합니다.
     if author_type == "다른 사람":
-        prompt += f"\n\n저자: {author_name}\n\n{author_name}이 작성함."
-    prompt += "\n\n본문 내용을 페이스북 및 링크드인에 올릴 수 있게 요약해줘. '페이스북/링크드인용 요약문 :' 이런 구문은 쓰지말고 바로 요약 텍스트부터 시작해. 사용된 AI툴, 혹은 노코드툴을 꼭 언급해줘. 3-5줄 정도로 존댓말을 사용하되 캐쥬얼하게 작성해줘. 전체 요약 중 이모지를 2개 정도 넣어줘."
+        prompt += f"\n\n저자: {author_name}님이 작성한 글입니다."
+    else:
+        prompt += "\n\n본인이 작성한 글입니다."
+
+    # 소셜 미디어 요약 요청을 프롬프트에 추가합니다.
+    prompt += "\n\n이 글을 페이스북과 링크드인에 적합하게 요약해주세요. 요약은 캐쥬얼한 어투로, 3-5줄 내에서 작성하고, 사용된 AI툴이나 노코드툴에 대한 언급과 이모지 2개를 포함해주세요."
+
+    # AI 모델을 통해 요약문을 생성합니다.
     response = openai.ChatCompletion.create(
-        model="gpt-3.5",
+        model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}]
     )
     summary = response['choices'][0]['message']['content'].strip()
-    if author_type == "본인":
-        prompt += "\n\n본문 내용을 페이스북 및 링크드인에 올릴 수 있게 요약해줘. 본인이기 때문에 ~라고 합니다. 라는 표현보다는 했습니다 혹은 했어요. 라고 표현해줘. '페이스북/링크드인용 요약문 :' 이런 구문은 쓰지말고 바로 요약 텍스트부터 시작해. 사용된 AI툴, 혹은 노코드툴을 꼭 언급해줘. 3-5줄 정도로 존댓말을 사용하되 캐쥬얼하게 작성해줘. 전체 요약 중 이모지를 2개 정도 넣어줘. 작성자가 본인이기 때문에 본인이 작성했다는 어투로 요약해줘. "
-        summary += "\n\n직접 AI 커뮤니티 게시판에 작성한 글입니다."
-    else:
-        summary += f"\n\n{author_name}님이 작성한 글입니다."
+
+    # 요약문 끝에 추가적인 정보를 덧붙입니다.
+    summary += f"\n\n{'본인이 작성한 글입니다.' if author_type == '본인' else f'{author_name}님이 작성한 글입니다.'}"
+    
     return summary
+
 
 def translate_to_english(text):
     prompt = f"Please translate the following Korean text to English:\n\n{text}"
     
     response = openai.ChatCompletion.create(
-        model="gpt-3.5",
+        model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}]
     )
     
@@ -148,4 +157,3 @@ if url and author_type and st.button("SNS 업로드용 요약문 만들기"):
     st.markdown(f"#### {title_text}")
     st.markdown(f"##### {author_name}")
     st.markdown(content_text)
-
