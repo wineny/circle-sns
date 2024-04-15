@@ -47,7 +47,7 @@ def summarize_text(content, author_type, author_name, title_text):
         prompt += f"\n\n저자: {author_name}\n\n{author_name}이 작성함."
     prompt += "\n\n본문 내용을 페이스북 및 링크드인에 올릴 수 있게 요약해줘. '페이스북/링크드인용 요약문 :' 이런 구문은 쓰지말고 바로 요약 텍스트부터 시작해. 사용된 AI툴, 혹은 노코드툴을 꼭 언급해줘. 3-5줄 정도로 존댓말을 사용하되 캐쥬얼하게 작성해줘. 전체 요약 중 이모지를 2개 정도 넣어줘."
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-3.5",
         messages=[{"role": "user", "content": prompt}]
     )
     summary = response['choices'][0]['message']['content'].strip()
@@ -62,7 +62,7 @@ def translate_to_english(text):
     prompt = f"Please translate the following Korean text to English:\n\n{text}"
     
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-3.5",
         messages=[{"role": "user", "content": prompt}]
     )
     
